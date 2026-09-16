@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useBooking } from "@/hooks/use-booking";
 import { getReservationById } from "@/actions/reservations";
@@ -11,6 +11,20 @@ const POLL_INTERVAL_MS = 2500;
 const MAX_POLLS = 20; // ~50 seconds
 
 export default function PaymentCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <Loader2 className="h-12 w-12 animate-spin text-green-600" />
+        </div>
+      }
+    >
+      <PaymentCallbackContent />
+    </Suspense>
+  );
+}
+
+function PaymentCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { updateBooking } = useBooking();
