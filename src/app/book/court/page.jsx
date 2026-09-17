@@ -17,16 +17,25 @@ export default function BookCourtPage() {
   const { data, updateBooking } = useBooking();
   const [courts, setCourts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [selectedId, setSelectedId] = useState(data.courtId);
+
+  const loadCourts = () => {
+    setLoading(true);
+    setError(false);
+    getActiveCourts()
+      .then(setCourts)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     if (!data.date) {
       router.push("/book");
       return;
     }
-    getActiveCourts()
-      .then(setCourts)
-      .finally(() => setLoading(false));
+    loadCourts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.date, router]);
 
   const handleContinue = () => {
@@ -42,6 +51,19 @@ export default function BookCourtPage() {
   };
 
   if (loading) return <LoadingPage />;
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-gray-500 mb-4">
+          Couldn&apos;t load courts right now. Please try again.
+        </p>
+        <Button onClick={loadCourts} className="bg-green-600 hover:bg-green-700 text-white">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div>
