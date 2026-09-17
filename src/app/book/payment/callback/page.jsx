@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useBooking } from "@/hooks/use-booking";
 import { getReservationById } from "@/actions/reservations";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -34,7 +35,20 @@ function PaymentCallbackContent() {
 
   const [state, setState] = useState("verifying"); // "verifying" | "paid" | "failed"
   const [message, setMessage] = useState("Verifying your payment...");
+  const [trackInfo, setTrackInfo] = useState(null);
   const pollCount = useRef(0);
+
+  useEffect(() => {
+    if (!reservationId) return;
+    getReservationById(reservationId).then((reservation) => {
+      if (reservation) {
+        setTrackInfo({
+          reservationNumber: reservation.reservation_number,
+          email: reservation.customer?.email || "",
+        });
+      }
+    });
+  }, [reservationId]);
 
   useEffect(() => {
     if (!reservationId) {
@@ -152,6 +166,17 @@ function PaymentCallbackContent() {
                 Go to Home
               </Button>
             </div>
+            {trackInfo && (
+              <p className="text-xs text-gray-400 mt-4">
+                You can come back to this booking anytime:{" "}
+                <Link
+                  href={`/track/${encodeURIComponent(trackInfo.reservationNumber)}?email=${encodeURIComponent(trackInfo.email)}`}
+                  className="text-green-600 hover:underline"
+                >
+                  Track Reservation
+                </Link>
+              </p>
+            )}
           </>
         )}
       </div>

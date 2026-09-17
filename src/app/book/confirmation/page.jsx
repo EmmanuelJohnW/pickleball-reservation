@@ -149,15 +149,33 @@ export default function BookConfirmationPage() {
           </Button>
         </div>
 
+        {data.paymentMethod === "cash" && (
+          <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-4 text-center print:hidden">
+            <p className="text-sm text-gray-600 mb-2">
+              Save this link to check your reservation status later:
+            </p>
+            <Link
+              href={`/track/${encodeURIComponent(data.reservationNumber)}?email=${encodeURIComponent(data.email || "")}`}
+              className="text-sm font-medium text-green-700 hover:underline break-all"
+            >
+              {typeof window !== "undefined" ? window.location.origin : ""}
+              /track/{data.reservationNumber}
+            </Link>
+          </div>
+        )}
+
         <div className="mt-4 text-center print:hidden">
           <Link href="/" className="text-sm text-gray-500 hover:text-green-600">
             <Home className="inline h-4 w-4 mr-1" />
             Back to Home
           </Link>
           <span className="text-gray-300 mx-2">·</span>
-          <span className="text-sm text-gray-500">
-            Use the search bar in the header to track your reservation
-          </span>
+          <Link
+            href={`/track/${encodeURIComponent(data.reservationNumber)}?email=${encodeURIComponent(data.email || "")}`}
+            className="text-sm text-gray-500 hover:text-green-600"
+          >
+            Track your reservation
+          </Link>
         </div>
       </div>
     </div>

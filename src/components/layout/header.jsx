@@ -12,7 +12,7 @@ import { formatCurrency, formatDate, formatTimeRange, getStatusColor } from "@/l
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/book", label: "Book a Court" },
-  { href: "/manage", label: "Manage Reservation" },
+  { href: "/track", label: "Track Reservation" },
 ];
 
 export function Header() {

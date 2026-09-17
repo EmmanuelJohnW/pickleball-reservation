@@ -27,8 +27,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/manage" className="hover:text-green-400 transition-colors">
-                  Manage Reservation
+                <Link href="/track" className="hover:text-green-400 transition-colors">
+                  Track Reservation
                 </Link>
               </li>
               <li>
