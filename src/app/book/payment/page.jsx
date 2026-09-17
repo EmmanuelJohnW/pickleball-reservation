@@ -68,7 +68,7 @@ export default function BookPaymentPage() {
     setProcessing(true);
     try {
       // Step 1: Create reservation + pending payment record
-      const { reservation, payment } = await createReservation({
+      const result = await createReservation({
         court_id: data.courtId,
         reservation_date: data.date,
         start_time: data.startTime,
@@ -78,6 +78,12 @@ export default function BookPaymentPage() {
         phone: data.phone,
         payment_method: selectedMethod,
       });
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const { reservation, payment } = result;
 
       updateBooking({
         reservationId: reservation.id,
@@ -96,14 +102,14 @@ export default function BookPaymentPage() {
           }),
         });
 
-        const result = await res.json();
+        const sourceResult = await res.json();
 
-        if (!res.ok || !result.checkout_url) {
-          throw new Error(result.error || "Failed to initialize payment");
+        if (!res.ok || !sourceResult.checkout_url) {
+          throw new Error(sourceResult.error || "Failed to initialize payment");
         }
 
         // Redirect to PayMongo checkout
-        window.location.href = result.checkout_url;
+        window.location.href = sourceResult.checkout_url;
       } else {
         // Cash: reservation is pending, admin confirms on arrival
         router.push("/book/confirmation");

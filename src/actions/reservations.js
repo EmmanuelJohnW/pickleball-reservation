@@ -149,7 +149,7 @@ export async function createReservation(data) {
 
   // 1. Get court price
   const court = await getCourt(data.court_id);
-  if (!court) throw new Error("Court not found");
+  if (!court) return { success: false, error: "Court not found" };
 
   // 2. Calculate duration
   const [startH, startM] = data.start_time.split(":").map(Number);
@@ -158,7 +158,15 @@ export async function createReservation(data) {
   const totalAmount = (duration / 60) * Number(court.price_per_hour);
 
   // 3. Create or find customer
-  const customer = await createCustomer(data.full_name, data.email, data.phone);
+  let customer;
+  try {
+    customer = await createCustomer(data.full_name, data.email, data.phone);
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to save customer details",
+    };
+  }
 
   // 4. Create reservation (trigger will generate reservation_number)
   const { data: reservation, error: resError } = await supabase
@@ -179,9 +187,12 @@ export async function createReservation(data) {
 
   if (resError) {
     if (resError.message.includes("overlap") || resError.message.includes("blocked")) {
-      throw new Error("This time slot is no longer available. Please select a different time.");
+      return {
+        success: false,
+        error: "This time slot is no longer available. Please select a different time.",
+      };
     }
-    throw new Error(resError.message);
+    return { success: false, error: resError.message };
   }
 
   // 5. Create payment record
@@ -196,9 +207,9 @@ export async function createReservation(data) {
     .select()
     .single();
 
-  if (payError) throw new Error(payError.message);
+  if (payError) return { success: false, error: payError.message };
 
-  return { reservation, payment };
+  return { success: true, reservation, payment };
 }
 
 export async function processPayment(
