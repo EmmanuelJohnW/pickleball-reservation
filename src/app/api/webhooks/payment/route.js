@@ -9,11 +9,13 @@ export async function POST(request) {
   const signature = request.headers.get("paymongo-signature");
   const webhookSecret = process.env.PAYMONGO_WEBHOOK_SECRET;
 
-  if (webhookSecret && signature) {
-    const valid = verifyWebhookSignature(rawBody, signature, webhookSecret);
-    if (!valid) {
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  if (!webhookSecret) {
+    console.error("PAYMONGO_WEBHOOK_SECRET is not configured — rejecting webhook");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+
+  if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   let body;
